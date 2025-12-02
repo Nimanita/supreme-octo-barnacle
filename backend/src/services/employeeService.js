@@ -1,4 +1,4 @@
-const Employee = require('../models/Employee');
+const Employee = require('../models/employee');
 const ApiError = require('../utils/ApiError');
 const Logger = require('../config/logger');
 

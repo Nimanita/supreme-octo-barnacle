@@ -27,6 +27,26 @@ const employeeSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+// Virtual for tasks
+employeeSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'assignedTo'
+});
+
+// Index for faster queries
+employeeSchema.index({ email: 1 });
+employeeSchema.index({ name: 1 });
+
+// Pre-remove hook to cascade delete tasks
+employeeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+  try {
+    await mongoose.model('Task').deleteMany({ assignedTo: this._id });
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 const Employee = mongoose.model('Employee', employeeSchema);
 
