@@ -24,6 +24,9 @@ This application enables teams to manage employees and their assigned tasks effi
 - **Automated Testing**: Extensive test suite covering CRUD operations, edge cases, and caching
 - **Data Seeding**: Pre-built script to populate database with sample data
 
+### Screenshots
+https://docs.google.com/document/d/1WGajI6E_hGVnMEYfqYyImR29tEO2x4Pa5Ptlrbq1qnE/edit?usp=sharing
+
 ## 🏗️ Architecture
 
 ```
