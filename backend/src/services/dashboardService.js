@@ -13,24 +13,37 @@ class DashboardService {
         priorityCounts,
         tasksByEmployee,
         overdueCount,
-        avgCompletionTime
+        avgCompletionTime,
+        totalEmployees,
+        totalTasks
       ] = await Promise.all([
         this.getStatusCounts(),
         this.getPriorityCounts(),
         this.getTasksByEmployee(),
         this.getOverdueTasksCount(),
-        this.getAverageCompletionTime()
+        this.getAverageCompletionTime(),
+        this.getTotalEmployees(),
+        this.getTotalTasks()
       ]);
 
       const completionRate = this.calculateCompletionRate(statusCounts);
+      const completedTasks = statusCounts.completed;
 
       const metrics = {
+        // Top-level stats for stat cards
+        employees: totalEmployees,
+        totalTasks: totalTasks,
+        completedTasks: completedTasks,
+        completionRate: completionRate,
+        
+        // Chart data
         statusCounts,
-        completionRate,
         priorityCounts,
+        
+        // Additional metrics
         tasksByEmployee,
-        overdueTasksCount: overdueCount,
-        averageCompletionTime: avgCompletionTime
+        overdueTasks: overdueCount,
+        avgCompletionTime: avgCompletionTime.formatted
       };
 
       Logger.info('Dashboard metrics fetched', { metrics });
@@ -39,6 +52,20 @@ class DashboardService {
       Logger.error('Error fetching dashboard metrics', { error: error.message });
       throw error;
     }
+  }
+
+  /**
+   * Get total number of employees
+   */
+  async getTotalEmployees() {
+    return await Employee.countDocuments();
+  }
+
+  /**
+   * Get total number of tasks
+   */
+  async getTotalTasks() {
+    return await Task.countDocuments();
   }
 
   /**
@@ -210,8 +237,8 @@ class DashboardService {
       hours: avgHours,
       days: avgDays,
       formatted: avgDays >= 1 
-        ? `${avgDays} day${avgDays !== 1 ? 's' : ''}` 
-        : `${avgHours} hour${avgHours !== 1 ? 's' : ''}`
+        ? `${avgDays}` 
+        : `${avgHours}`
     };
   }
 }

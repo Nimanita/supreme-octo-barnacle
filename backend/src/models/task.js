@@ -65,6 +65,32 @@ taskSchema.pre('save', function(next) {
   next();
 });
 
+// Pre-update hook: Handles findByIdAndUpdate, findOneAndUpdate, etc.
+taskSchema.pre('findOneAndUpdate', function(next) {
+  const update = this.getUpdate();
+  
+  // Handle both direct update and $set syntax
+  const statusUpdate = update.status || (update.$set && update.$set.status);
+  
+  if (statusUpdate === 'completed') {
+    // Set completedAt to current time when status is completed
+    if (update.$set) {
+      update.$set.completedAt = new Date();
+    } else {
+      this.set({ completedAt: new Date() });
+    }
+  } else if (statusUpdate && statusUpdate !== 'completed') {
+    // Clear completedAt when status changes away from completed
+    if (update.$set) {
+      update.$set.completedAt = null;
+    } else {
+      this.set({ completedAt: null });
+    }
+  }
+  
+  next();
+});
+
 // Static method to find overdue tasks
 taskSchema.statics.findOverdue = function() {
   return this.find({
