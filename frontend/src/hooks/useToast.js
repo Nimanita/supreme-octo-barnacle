@@ -13,10 +13,14 @@ export const useToast = () => {
     }, duration);
   }, []);
   
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+  
   const success = useCallback((message) => showToast(message, 'success'), [showToast]);
   const error = useCallback((message) => showToast(message, 'error'), [showToast]);
   const info = useCallback((message) => showToast(message, 'info'), [showToast]);
   const warning = useCallback((message) => showToast(message, 'warning'), [showToast]);
   
-  return { toasts, success, error, info, warning };
+  return { toasts, success, error, info, warning, removeToast };
 };

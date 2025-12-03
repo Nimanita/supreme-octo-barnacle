@@ -55,7 +55,7 @@ const EmployeeCard = ({ employee, onEdit, onDelete }) => {
             <Edit className="h-4 w-4" />
           </button>
           <button
-            onClick={() => onDelete(employee._id)}
+            onClick={() => onDelete(employee)}
             className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 className="h-4 w-4" />

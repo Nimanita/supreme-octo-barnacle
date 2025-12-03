@@ -6,21 +6,28 @@ import { employeeApi } from '@/api/employeeApi';
 import { useToast } from '@/hooks/useToast';
 import { Loading } from '@/components/common/Loading';
 import { EmptyState } from '@/components/common/EmptyState';
+import { Toast } from '@/components/common/Toast';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Modal from '@/components/common/Modal';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import EmployeeList from '@/components/employees/EmployeeList';
 import EmployeeForm from '@/components/employees/EmployeeForm';
 import { debounce } from '@/utils/helpers';
+import { handleApiError } from '@/utils/errorHandler';
 
 const Employees = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, employee: null });
+  const [editConfirm, setEditConfirm] = useState({ isOpen: false, employee: null, formData: null });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const { data, meta, loading, error, refetch } = useEmployees({ page, search, limit: 10 });
-  const { success, error: showError } = useToast();
+  const { toasts, success, error: showError, removeToast } = useToast();
   
   const handleSearch = debounce((value) => {
     setSearch(value);
@@ -37,37 +44,67 @@ const Employees = () => {
     setIsModalOpen(true);
   };
   
-  const handleDeleteEmployee = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this employee?')) return;
-    
+  const handleDeleteEmployee = (employee) => {
+    setDeleteConfirm({ isOpen: true, employee });
+  };
+  
+  const confirmDelete = async () => {
+    setIsDeleting(true);
     try {
-      await employeeApi.delete(id);
+      await employeeApi.delete(deleteConfirm.employee._id);
       success('Employee deleted successfully');
+      setDeleteConfirm({ isOpen: false, employee: null });
       refetch();
     } catch (err) {
-      showError(err.message || 'Failed to delete employee');
+      handleApiError(err, showError, 'Failed to delete employee. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
   
   const handleSubmit = async (formData) => {
     try {
       if (editingEmployee) {
-        await employeeApi.update(editingEmployee._id, formData);
-        success('Employee updated successfully');
+        // Show confirmation dialog for editing
+        setEditConfirm({ 
+          isOpen: true, 
+          employee: editingEmployee, 
+          formData 
+        });
       } else {
+        // Create new employee directly
         await employeeApi.create(formData);
         success('Employee created successfully');
+        setIsModalOpen(false);
+        refetch();
       }
+    } catch (err) {
+      handleApiError(err, showError, 'Failed to save employee. Please try again.');
+      throw err;
+    }
+  };
+  
+  const confirmEdit = async () => {
+    setIsUpdating(true);
+    try {
+      await employeeApi.update(editConfirm.employee._id, editConfirm.formData);
+      success('Employee role updated successfully');
+      setEditConfirm({ isOpen: false, employee: null, formData: null });
       setIsModalOpen(false);
       refetch();
     } catch (err) {
-      showError(err.message || 'Failed to save employee');
-      throw err;
+      handleApiError(err, showError, 'Failed to update employee role. Please try again.');
+      setEditConfirm({ isOpen: false, employee: null, formData: null });
+    } finally {
+      setIsUpdating(false);
     }
   };
   
   return (
     <div className="space-y-6">
+      {/* Toast Component - Add this at the top */}
+      <Toast toasts={toasts} onClose={removeToast} />
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -164,18 +201,45 @@ const Employees = () => {
         </>
       )}
       
-      {/* Modal */}
+      {/* Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingEmployee ? 'Edit Employee' : 'Add Employee'}
+        title={editingEmployee ? 'Edit Employee Role' : 'Add Employee'}
       >
         <EmployeeForm
           initialData={editingEmployee}
           onSubmit={handleSubmit}
           onCancel={() => setIsModalOpen(false)}
+          isEditing={!!editingEmployee}
         />
       </Modal>
+      
+      {/* Edit Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={editConfirm.isOpen}
+        onClose={() => setEditConfirm({ isOpen: false, employee: null, formData: null })}
+        onConfirm={confirmEdit}
+        title="Confirm Role Update"
+        message={`Are you sure you want to update the role for ${editConfirm.employee?.name}? The new role will be "${editConfirm.formData?.role || 'Not specified'}".`}
+        confirmText="Update Role"
+        cancelText="Cancel"
+        variant="primary"
+        isLoading={isUpdating}
+      />
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, employee: null })}
+        onConfirm={confirmDelete}
+        title="Delete Employee"
+        message={`Are you sure you want to delete ${deleteConfirm.employee?.name}? This action cannot be undone and will remove all associated tasks.`}
+        confirmText="Delete Employee"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

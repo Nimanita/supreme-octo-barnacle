@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
-const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
+const EmployeeForm = ({ initialData, onSubmit, onCancel, isEditing = false }) => {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     email: initialData?.email || '',
@@ -15,14 +15,17 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
   const validate = () => {
     const newErrors = {};
     
-    if (!formData.name || formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
-    }
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    // Only validate name and email when creating (not editing)
+    if (!isEditing) {
+      if (!formData.name || formData.name.length < 2) {
+        newErrors.name = 'Name must be at least 2 characters';
+      }
+      
+      if (!formData.email) {
+        newErrors.email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = 'Email is invalid';
+      }
     }
     
     setErrors(newErrors);
@@ -36,7 +39,9 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
     
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      // When editing, only send role
+      const submitData = isEditing ? { role: formData.role } : formData;
+      await onSubmit(submitData);
     } catch (err) {
       // Error handled by parent
     } finally {
@@ -61,8 +66,10 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
         value={formData.name}
         onChange={handleChange}
         error={errors.name}
-        required
+        required={!isEditing}
         placeholder="John Doe"
+        disabled={isEditing}
+        helperText={isEditing ? "Name cannot be changed" : ""}
       />
       
       <Input
@@ -72,8 +79,10 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
-        required
+        required={!isEditing}
         placeholder="john@example.com"
+        disabled={isEditing}
+        helperText={isEditing ? "Email cannot be changed" : ""}
       />
       
       <Input
@@ -83,7 +92,7 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
         onChange={handleChange}
         error={errors.role}
         placeholder="Software Engineer"
-        helperText="Optional"
+        helperText={isEditing ? "Update the employee's role or position" : "Optional"}
       />
       
       <div className="flex gap-3 pt-4">
@@ -93,7 +102,7 @@ const EmployeeForm = ({ initialData, onSubmit, onCancel }) => {
           isLoading={isSubmitting}
           className="flex-1"
         >
-          {initialData ? 'Update' : 'Create'} Employee
+          {isEditing ? 'Update Role' : 'Create Employee'}
         </Button>
         <Button
           type="button"

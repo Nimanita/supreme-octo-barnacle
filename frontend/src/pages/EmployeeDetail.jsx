@@ -1,5 +1,5 @@
 // src/pages/EmployeeDetail.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Briefcase, Calendar, Edit, Trash2 } from 'lucide-react';
 import { useEmployee } from '@/hooks/useEmployees';
@@ -7,27 +7,62 @@ import { employeeApi } from '@/api/employeeApi';
 import { useToast } from '@/hooks/useToast';
 import { Loading } from '@/components/common/Loading';
 import { Card } from '@/components/common/Card';
+import { Toast } from '@/components/common/Toast';
 import Button from '@/components/common/Button';
+import Modal from '@/components/common/Modal';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import TaskCard from '@/components/tasks/TaskCard';
 import { formatDate, getInitials } from '@/utils/helpers';
+import { handleApiError } from '@/utils/errorHandler';
+import Input from '@/components/common/Input';
 
 const EmployeeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data, loading, error } = useEmployee(id);
-  const { success, error: showError } = useToast();
+  const { data, loading, error, refetch } = useEmployee(id);
+  const { toasts, success, error: showError, removeToast } = useToast();
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [role, setRole] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const handleEditClick = () => {
+    if (data) {
+      const employee = data.employee || data;
+      setRole(employee.role || '');
+      setIsEditModalOpen(true);
+    }
+  };
+  
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await employeeApi.update(id, { role });
+      success('Employee role updated successfully');
+      setIsEditModalOpen(false);
+      refetch();
+    } catch (err) {
+      handleApiError(err, showError, 'Failed to update employee');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure? This will delete the employee and all their tasks.')) {
-      return;
-    }
-    
+    setIsDeleting(true);
     try {
       await employeeApi.delete(id);
       success('Employee deleted successfully');
       navigate('/employees');
     } catch (err) {
-      showError(err.message || 'Failed to delete employee');
+      handleApiError(err, showError, 'Failed to delete employee');
+      setDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
   
@@ -51,6 +86,9 @@ const EmployeeDetail = () => {
   
   return (
     <div className="space-y-6">
+      {/* Toast Component */}
+      <Toast toasts={toasts} onClose={removeToast} />
+      
       {/* Back Button */}
       <Link
         to="/employees"
@@ -95,14 +133,14 @@ const EmployeeDetail = () => {
             <Button
               variant="outline"
               leftIcon={<Edit className="h-4 w-4" />}
-              onClick={() => navigate(`/employees`)}
+              onClick={handleEditClick}
             >
-              Edit
+              Edit Role
             </Button>
             <Button
               variant="danger"
               leftIcon={<Trash2 className="h-4 w-4" />}
-              onClick={handleDelete}
+              onClick={() => setDeleteConfirm(true)}
             >
               Delete
             </Button>
@@ -132,6 +170,79 @@ const EmployeeDetail = () => {
           </div>
         )}
       </div>
+      
+      {/* Edit Role Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Employee Role"
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name (Read-only)
+            </label>
+            <input
+              type="text"
+              value={employee.name}
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email (Read-only)
+            </label>
+            <input
+              type="email"
+              value={employee.email}
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+            />
+          </div>
+          
+          <Input
+            label="Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="e.g., Software Engineer"
+            helperText="Update the employee's role or position"
+          />
+          
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isSubmitting}
+              className="flex-1"
+            >
+              Update Role
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm}
+        onClose={() => setDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Employee"
+        message={`Are you sure you want to delete ${employee.name}? This action cannot be undone and will remove all associated tasks.`}
+        confirmText="Delete Employee"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

@@ -36,26 +36,27 @@ export const useEmployee = (id) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  useEffect(() => {
-    const fetchEmployee = async () => {
-      if (!id) return;
-      
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await employeeApi.getById(id);
-        setData(response.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchEmployee = async () => {
+    if (!id) return;
     
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await employeeApi.getById(id);
+      setData(response.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchEmployee();
   }, [id]);
   
-  return { data, loading, error };
+  const refetch = () => fetchEmployee();
+  
+  return { data, loading, error, refetch };
 };
-
 

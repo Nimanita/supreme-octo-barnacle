@@ -1,5 +1,6 @@
 // src/components/common/Toast.jsx
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { cn } from '@/utils/helpers';
 
 export const Toast = ({ toasts, onClose }) => {
   const icons = {

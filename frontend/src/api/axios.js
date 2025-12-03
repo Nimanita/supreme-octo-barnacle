@@ -33,6 +33,14 @@ api.interceptors.response.use(
     return response.data; // Return only data part
   },
   (error) => {
+    // Log error for debugging
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
+
     // Handle errors globally
     const message = error.response?.data?.message || error.message || 'Something went wrong';
     
@@ -46,10 +54,13 @@ api.interceptors.response.use(
       console.error('Server error');
     }
     
+    // Return enhanced error object that preserves the original error
     return Promise.reject({
+      ...error,
       message,
       status: error.response?.status,
       data: error.response?.data,
+      response: error.response, // Keep original response for detailed error handling
     });
   }
 );

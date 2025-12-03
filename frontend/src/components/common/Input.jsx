@@ -2,18 +2,18 @@
 import React from 'react';
 import { cn } from '@/utils/helpers';
 
-const Input = React.forwardRef(({
+const Input = ({
   label,
   error,
   helperText,
   leftIcon,
   rightIcon,
-  className = '',
-  containerClassName = '',
+  className,
+  disabled,
   ...props
-}, ref) => {
+}) => {
   return (
-    <div className={cn('w-full', containerClassName)}>
+    <div className="w-full">
       {label && (
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {label}
@@ -29,16 +29,18 @@ const Input = React.forwardRef(({
         )}
         
         <input
-          ref={ref}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg transition-colors duration-200',
+            'w-full px-3 py-2 border rounded-lg transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
-            error ? 'border-red-500' : 'border-gray-300',
             leftIcon && 'pl-10',
             rightIcon && 'pr-10',
+            error
+              ? 'border-red-300 text-red-900 placeholder-red-300'
+              : 'border-gray-300 text-gray-900 placeholder-gray-400',
+            disabled && 'bg-gray-100 cursor-not-allowed opacity-60',
             className
           )}
+          disabled={disabled}
           {...props}
         />
         
@@ -58,8 +60,6 @@ const Input = React.forwardRef(({
       )}
     </div>
   );
-});
-
-Input.displayName = 'Input';
+};
 
 export default Input;
