@@ -1,59 +1,71 @@
 const Task = require('../models/task');
 const Employee = require('../models/employee');
 const Logger = require('../config/logger');
+const redis = require("../config/redis");
 
 class DashboardService {
   /**
    * Get comprehensive dashboard metrics
    */
-  async getDashboardMetrics() {
-    try {
-      const [
-        statusCounts,
-        priorityCounts,
-        tasksByEmployee,
-        overdueCount,
-        avgCompletionTime,
-        totalEmployees,
-        totalTasks
-      ] = await Promise.all([
-        this.getStatusCounts(),
-        this.getPriorityCounts(),
-        this.getTasksByEmployee(),
-        this.getOverdueTasksCount(),
-        this.getAverageCompletionTime(),
-        this.getTotalEmployees(),
-        this.getTotalTasks()
-      ]);
+  // 1. Check cache
+  
 
-      const completionRate = this.calculateCompletionRate(statusCounts);
-      const completedTasks = statusCounts.completed;
+async getDashboardMetrics() {
+  try {
+    // 1. Check Redis cache
+    const cached = await redis.get("dashboard:metrics");
 
-      const metrics = {
-        // Top-level stats for stat cards
-        employees: totalEmployees,
-        totalTasks: totalTasks,
-        completedTasks: completedTasks,
-        completionRate: completionRate,
-        
-        // Chart data
-        statusCounts,
-        priorityCounts,
-        
-        // Additional metrics
-        tasksByEmployee,
-        overdueTasks: overdueCount,
-        avgCompletionTime: avgCompletionTime.formatted
-      };
-
-      Logger.info('Dashboard metrics fetched', { metrics });
-      return metrics;
-    } catch (error) {
-      Logger.error('Error fetching dashboard metrics', { error: error.message });
-      throw error;
+    if (cached) {
+      console.log("⚡ REDIS HIT → Returning cached dashboard metrics");
+      return JSON.parse(cached);
     }
-  }
 
+    console.log("❌ REDIS MISS → Fetching fresh dashboard metrics from MongoDB");
+
+    // 2. Fresh DB queries
+    const [
+      statusCounts,
+      priorityCounts,
+      tasksByEmployee,
+      overdueCount,
+      avgCompletionTime,
+      totalEmployees,
+      totalTasks
+    ] = await Promise.all([
+      this.getStatusCounts(),
+      this.getPriorityCounts(),
+      this.getTasksByEmployee(),
+      this.getOverdueTasksCount(),
+      this.getAverageCompletionTime(),
+      this.getTotalEmployees(),
+      this.getTotalTasks()
+    ]);
+
+    const completionRate = this.calculateCompletionRate(statusCounts);
+
+    const metrics = {
+      employees: totalEmployees,
+      totalTasks,
+      completedTasks: statusCounts.completed,
+      completionRate,
+      statusCounts,
+      priorityCounts,
+      tasksByEmployee,
+      overdueTasks: overdueCount,
+      avgCompletionTime: avgCompletionTime.formatted
+    };
+
+    // 3. Cache new data for 30s
+    await redis.set("dashboard:metrics", JSON.stringify(metrics), "EX", 30);
+
+    console.log("📦 REDIS SET → Cached dashboard metrics for 30 seconds");
+
+    return metrics;
+  } catch (err) {
+    console.log("❗ REDIS / DASHBOARD ERROR:", err.message);
+    throw err;
+  }
+}
   /**
    * Get total number of employees
    */

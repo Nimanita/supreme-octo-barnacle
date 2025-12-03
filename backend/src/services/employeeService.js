@@ -1,7 +1,7 @@
 const Employee = require('../models/employee');
 const ApiError = require('../utils/ApiError');
 const Logger = require('../config/logger');
-
+const redis = require("../config/redis");
 class EmployeeService {
   /**
    * Get all employees with pagination and search
@@ -94,6 +94,8 @@ class EmployeeService {
     try {
       const employee = await Employee.create(employeeData);
       Logger.info('Employee created', { employeeId: employee._id });
+      await redis.del("dashboard:metrics");
+
       return employee.toObject();
     } catch (error) {
       Logger.error('Error creating employee', { 
@@ -120,6 +122,7 @@ class EmployeeService {
       }
 
       Logger.info('Employee updated', { employeeId: id });
+      await redis.del("dashboard:metrics");
       return employee;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -146,6 +149,7 @@ class EmployeeService {
       await employee.deleteOne();
 
       Logger.info('Employee deleted', { employeeId: id });
+      await redis.del("dashboard:metrics");
       return { deleted: true };
     } catch (error) {
       if (error instanceof ApiError) throw error;

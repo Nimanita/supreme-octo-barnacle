@@ -1,6 +1,7 @@
 const Task = require('../models/task');
 const ApiError = require('../utils/ApiError');
 const Logger = require('../config/logger');
+const redis = require("../config/redis");
 
 class TaskService {
   /**
@@ -120,11 +121,13 @@ class TaskService {
       }
 
       const task = await Task.create(taskData);
+      
       const populatedTask = await Task.findById(task._id)
         .populate('assignedTo', 'name email')
         .lean();
 
       Logger.info('Task created', { taskId: task._id });
+      await redis.del("dashboard:metrics");
       return populatedTask;
     } catch (error) {
       Logger.error('Error creating task', { 
@@ -160,6 +163,7 @@ class TaskService {
       }
 
       Logger.info('Task updated', { taskId: id });
+      await redis.del("dashboard:metrics");
       return task;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -183,6 +187,7 @@ class TaskService {
       }
 
       Logger.info('Task deleted', { taskId: id });
+      await redis.del("dashboard:metrics");
       return { deleted: true };
     } catch (error) {
       if (error instanceof ApiError) throw error;
