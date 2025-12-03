@@ -8,7 +8,7 @@ const DashboardStats = ({ stats }) => {
     purple: 'bg-purple-100 text-purple-600',
     green: 'bg-green-100 text-green-600',
     orange: 'bg-orange-100 text-orange-600',
-    red: 'bg-red-100 text-red-600',
+    red: 'bg-rose-100 text-rose-600',
   };
   
   return (
@@ -16,17 +16,25 @@ const DashboardStats = ({ stats }) => {
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <Card key={index} className="hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {stat.value}
-                </p>
+          <Card 
+            key={index} 
+            className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-l-4 border-primary-500 bg-gradient-to-br from-white to-primary-50/30 overflow-hidden relative"
+          >
+            <div className="absolute top-0 right-0 text-8xl opacity-5 transform translate-x-4 -translate-y-4">
+              <Icon />
+            </div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-xl shadow-lg bg-gradient-to-br ${stat.gradient}`}>
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
               </div>
-              <div className={`p-3 rounded-lg ${colorClasses[stat.color]}`}>
-                <Icon className="h-6 w-6" />
-              </div>
+              <p className="text-sm font-bold text-slate-600 uppercase tracking-wide mb-2">
+                {stat.title}
+              </p>
+              <p className="text-4xl font-bold text-slate-800">
+                {stat.value}
+              </p>
             </div>
           </Card>
         );

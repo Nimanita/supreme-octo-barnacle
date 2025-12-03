@@ -1,6 +1,7 @@
 // src/components/tasks/TaskForm.jsx
 import React, { useState } from 'react';
 import { useEmployees } from '@/hooks/useEmployees';
+import { Calendar, Flag, User, FileText, CheckSquare } from 'lucide-react';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
@@ -40,7 +41,6 @@ const TaskForm = ({ initialData, onSubmit, onCancel }) => {
     
     setIsSubmitting(true);
     try {
-      // Clean up data before sending
       const submitData = {
         ...formData,
         assignedTo: formData.assignedTo || null,
@@ -63,19 +63,29 @@ const TaskForm = ({ initialData, onSubmit, onCancel }) => {
   };
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        label="Title"
-        name="title"
-        value={formData.title}
-        onChange={handleChange}
-        error={errors.title}
-        required
-        placeholder="Enter task title"
-      />
-      
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+          <FileText className="h-4 w-4 text-primary-600" />
+          Task Title *
+        </label>
+        <input
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder="Enter a clear, descriptive title..."
+          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-slate-800 placeholder:text-slate-400"
+        />
+        {errors.title && (
+          <p className="mt-1.5 text-sm text-rose-600 font-medium">{errors.title}</p>
+        )}
+      </div>
+      
+      {/* Description */}
+      <div>
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+          <FileText className="h-4 w-4 text-primary-600" />
           Description
         </label>
         <textarea
@@ -83,58 +93,63 @@ const TaskForm = ({ initialData, onSubmit, onCancel }) => {
           value={formData.description}
           onChange={handleChange}
           rows={4}
-          placeholder="Enter task description (optional)"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          placeholder="Add details about this task..."
+          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none text-slate-800 placeholder:text-slate-400"
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+          <p className="mt-1.5 text-sm text-rose-600 font-medium">{errors.description}</p>
         )}
       </div>
       
+      {/* Status and Priority Row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+            <CheckSquare className="h-4 w-4 text-blue-600" />
             Status
           </label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium text-slate-800 bg-white"
           >
-            <option value="todo">To Do</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="todo">📋 To Do</option>
+            <option value="in_progress">⚡ In Progress</option>
+            <option value="completed">✅ Completed</option>
           </select>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+            <Flag className="h-4 w-4 text-orange-600" />
             Priority
           </label>
           <select
             name="priority"
             value={formData.priority}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium text-slate-800 bg-white"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="low">🟢 Low</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="high">🔴 High</option>
           </select>
         </div>
       </div>
       
+      {/* Assignee and Due Date Row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Assigned To
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+            <User className="h-4 w-4 text-purple-600" />
+            Assign To
           </label>
           <select
             name="assignedTo"
             value={formData.assignedTo}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium text-slate-800 bg-white"
           >
             <option value="">Unassigned</option>
             {employees.map((employee) => (
@@ -145,30 +160,37 @@ const TaskForm = ({ initialData, onSubmit, onCancel }) => {
           </select>
         </div>
         
-        <Input
-          label="Due Date"
-          name="dueDate"
-          type="date"
-          value={formData.dueDate}
-          onChange={handleChange}
-          helperText="Optional"
-        />
+        <div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            Due Date
+          </label>
+          <input
+            name="dueDate"
+            type="date"
+            value={formData.dueDate}
+            onChange={handleChange}
+            className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium text-slate-800 bg-white"
+          />
+        </div>
       </div>
       
-      <div className="flex gap-3 pt-4">
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-4 border-t-2 border-slate-100">
         <Button
           type="submit"
           variant="primary"
           isLoading={isSubmitting}
-          className="flex-1"
+          className="flex-1 py-3 font-semibold"
         >
-          {initialData ? 'Update' : 'Create'} Task
+          {initialData ? '✨ Update Task' : '🚀 Create Task'}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isSubmitting}
+          className="px-6 font-semibold"
         >
           Cancel
         </Button>

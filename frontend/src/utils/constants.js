@@ -13,15 +13,15 @@ export const TASK_PRIORITY = {
 };
 
 export const STATUS_OPTIONS = [
-  { value: TASK_STATUS.TODO, label: 'To Do', color: 'gray' },
+  { value: TASK_STATUS.TODO, label: 'To Do', color: 'purple' },
   { value: TASK_STATUS.IN_PROGRESS, label: 'In Progress', color: 'blue' },
   { value: TASK_STATUS.COMPLETED, label: 'Completed', color: 'green' },
 ];
 
 export const PRIORITY_OPTIONS = [
-  { value: TASK_PRIORITY.LOW, label: 'Low', color: 'gray' },
-  { value: TASK_PRIORITY.MEDIUM, label: 'Medium', color: 'yellow' },
-  { value: TASK_PRIORITY.HIGH, label: 'High', color: 'red' },
+  { value: TASK_PRIORITY.LOW, label: 'Low', color: 'emerald' },
+  { value: TASK_PRIORITY.MEDIUM, label: 'Medium', color: 'orange' },
+  { value: TASK_PRIORITY.HIGH, label: 'High', color: 'rose' },
 ];
 
 export const PAGINATION_LIMITS = [10, 20, 50, 100];

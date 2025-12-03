@@ -71,8 +71,8 @@ const EmployeeDetail = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">Error: {error}</p>
-        <Link to="/employees" className="text-primary-600 hover:underline mt-4 inline-block">
+        <p className="text-rose-600 font-semibold">Error: {error}</p>
+        <Link to="/employees" className="text-primary-600 hover:underline mt-4 inline-block font-medium">
           Back to Employees
         </Link>
       </div>
@@ -86,44 +86,49 @@ const EmployeeDetail = () => {
   
   return (
     <div className="space-y-6">
-      {/* Toast Component */}
       <Toast toasts={toasts} onClose={removeToast} />
       
       {/* Back Button */}
       <Link
         to="/employees"
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        className="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors font-medium group"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
         Back to Employees
       </Link>
       
-      {/* Employee Header */}
-      <Card>
+      {/* Employee Header Card */}
+      <Card className="bg-gradient-to-br from-white to-purple-50/30 border-l-4 border-purple-500">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="h-20 w-20 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-700 font-bold text-2xl">
+            <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-xl">
+              <span className="text-white font-bold text-3xl">
                 {getInitials(employee.name)}
               </span>
             </div>
             
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{employee.name}</h1>
-              <div className="mt-3 space-y-2">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Mail className="h-4 w-4" />
-                  <span>{employee.email}</span>
+              <h1 className="text-3xl font-bold text-slate-800 mb-4">{employee.name}</h1>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <Mail className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-slate-700 font-medium">{employee.email}</span>
                 </div>
                 {employee.role && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Briefcase className="h-4 w-4" />
-                    <span>{employee.role}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-emerald-100 rounded-lg">
+                      <Briefcase className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <span className="text-slate-700 font-medium">{employee.role}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>Joined {formatDate(employee.createdAt)}</span>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-purple-100 rounded-lg">
+                    <Calendar className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-slate-700 font-medium">Joined {formatDate(employee.createdAt)}</span>
                 </div>
               </div>
             </div>
@@ -134,6 +139,7 @@ const EmployeeDetail = () => {
               variant="outline"
               leftIcon={<Edit className="h-4 w-4" />}
               onClick={handleEditClick}
+              className="font-semibold"
             >
               Edit Role
             </Button>
@@ -141,6 +147,7 @@ const EmployeeDetail = () => {
               variant="danger"
               leftIcon={<Trash2 className="h-4 w-4" />}
               onClick={() => setDeleteConfirm(true)}
+              className="font-semibold"
             >
               Delete
             </Button>
@@ -151,19 +158,21 @@ const EmployeeDetail = () => {
       {/* Tasks Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Tasks ({tasks.length})
+          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+            <div className="h-1 w-1 rounded-full bg-primary-600"></div>
+            Assigned Tasks
+            <span className="text-lg font-semibold text-slate-500">({tasks.length})</span>
           </h2>
         </div>
         
         {tasks.length === 0 ? (
-          <Card>
-            <p className="text-center text-gray-600 py-8">
-              No tasks assigned to this employee
+          <Card className="text-center py-12 bg-gradient-to-br from-slate-50 to-slate-100/50">
+            <p className="text-slate-600 text-lg font-medium">
+              No tasks assigned to this employee yet
             </p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {tasks.map((task) => (
               <TaskCard key={task._id} task={task} />
             ))}
@@ -179,51 +188,60 @@ const EmployeeDetail = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Name (Read-only)
             </label>
             <input
               type="text"
               value={employee.name}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed font-medium"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Email (Read-only)
             </label>
             <input
               type="email"
               value={employee.email}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed font-medium"
             />
           </div>
           
-          <Input
-            label="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder="e.g., Software Engineer"
-            helperText="Update the employee's role or position"
-          />
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
+              <Briefcase className="h-4 w-4 text-emerald-600" />
+              Role / Position
+            </label>
+            <input
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="e.g., Software Engineer"
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
+            />
+            <p className="mt-1.5 text-xs text-slate-500 font-medium">
+              Update the employee's role or position
+            </p>
+          </div>
           
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 border-t-2 border-slate-100">
             <Button
               type="submit"
               variant="primary"
               isLoading={isSubmitting}
-              className="flex-1"
+              className="flex-1 py-3 font-semibold"
             >
-              Update Role
+              ✨ Update Role
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setIsEditModalOpen(false)}
               disabled={isSubmitting}
+              className="px-6 font-semibold"
             >
               Cancel
             </Button>

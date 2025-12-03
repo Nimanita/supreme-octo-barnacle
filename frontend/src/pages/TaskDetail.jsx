@@ -1,7 +1,7 @@
 // src/pages/TaskDetail.jsx
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Edit, Trash2, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Edit, Trash2, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useTask } from '@/hooks/useTasks';
 import { taskApi } from '@/api/taskApi';
 import { useToast } from '@/hooks/useToast';
@@ -52,7 +52,7 @@ const TaskDetail = () => {
       await taskApi.update(id, formData);
       success('Task updated successfully');
       setIsEditModalOpen(false);
-      window.location.reload(); // Refresh to get updated data
+      window.location.reload();
     } catch (err) {
       showError(err.message || 'Failed to update task');
       throw err;
@@ -64,8 +64,8 @@ const TaskDetail = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">Error: {error}</p>
-        <Link to="/tasks" className="text-primary-600 hover:underline mt-4 inline-block">
+        <p className="text-rose-600 font-semibold">Error: {error}</p>
+        <Link to="/tasks" className="text-primary-600 hover:underline mt-4 inline-block font-medium">
           Back to Tasks
         </Link>
       </div>
@@ -79,36 +79,43 @@ const TaskDetail = () => {
   
   return (
     <>
-      {/* Toast Container */}
       <Toast toasts={toasts} onClose={removeToast} />
       
       <div className="space-y-6 max-w-4xl">
         {/* Back Button */}
         <Link
           to="/tasks"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 transition-colors font-medium group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Tasks
         </Link>
         
-        {/* Task Header */}
-        <Card>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+        {/* Task Header Card */}
+        <Card className="bg-gradient-to-br from-white to-primary-50/30 border-l-4 border-primary-500">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-3">{task.title}</h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={cn('badge', getStatusColor(task.status))}>
-                  {getStatusLabel(task.status)}
-                </span>
-                <span className={cn('badge', getPriorityColor(task.priority))}>
-                  {getPriorityLabel(task.priority)}
-                </span>
-                {overdue && (
-                  <span className="badge bg-red-100 text-red-800">
-                    Overdue
-                  </span>
-                )}
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-3 bg-primary-100 rounded-xl">
+                  <CheckCircle className="h-6 w-6 text-primary-600" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-slate-800 mb-3">{task.title}</h1>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={cn('px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm', getStatusColor(task.status))}>
+                      {getStatusLabel(task.status)}
+                    </span>
+                    <span className={cn('px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm', getPriorityColor(task.priority))}>
+                      {getPriorityLabel(task.priority)}
+                    </span>
+                    {overdue && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-rose-100 text-rose-700 shadow-sm flex items-center gap-1.5">
+                        <AlertCircle className="h-4 w-4" />
+                        Overdue
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -117,6 +124,7 @@ const TaskDetail = () => {
                 variant="outline"
                 leftIcon={<Edit className="h-4 w-4" />}
                 onClick={handleEdit}
+                className="font-semibold"
               >
                 Edit
               </Button>
@@ -124,68 +132,84 @@ const TaskDetail = () => {
                 variant="danger"
                 leftIcon={<Trash2 className="h-4 w-4" />}
                 onClick={handleDelete}
+                className="font-semibold"
               >
                 Delete
               </Button>
             </div>
           </div>
           
-          {/* Description */}
+          {/* Description Section */}
           {task.description && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Description</h3>
-              <p className="text-gray-600 whitespace-pre-wrap">{task.description}</p>
+            <div className="mb-6 p-4 bg-white/50 rounded-xl border-2 border-slate-100">
+              <h3 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide flex items-center gap-2">
+                <div className="h-1 w-1 rounded-full bg-primary-600"></div>
+                Description
+              </h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{task.description}</p>
             </div>
           )}
           
           {/* Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t-2 border-slate-100">
             {/* Assigned To */}
-            <div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <User className="h-4 w-4" />
-                <span className="font-medium">Assigned To</span>
+            <div className="p-4 bg-purple-50 rounded-xl border-2 border-purple-100 hover:border-purple-200 transition-colors">
+              <div className="flex items-center gap-2 text-sm text-purple-700 mb-2 font-semibold">
+                <div className="p-1.5 bg-purple-100 rounded-lg">
+                  <User className="h-4 w-4" />
+                </div>
+                Assigned To
               </div>
               {task.assignedTo ? (
                 <Link
                   to={`/employees/${task.assignedTo._id || task.assignedTo}`}
-                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                  className="text-purple-700 hover:text-purple-800 font-bold text-lg transition-colors"
                 >
                   {task.assignedTo.name || 'View Employee'}
                 </Link>
               ) : (
-                <span className="text-gray-500">Unassigned</span>
+                <span className="text-slate-500 font-medium">Unassigned</span>
               )}
             </div>
             
             {/* Due Date */}
-            <div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <Calendar className="h-4 w-4" />
-                <span className="font-medium">Due Date</span>
+            <div className={cn("p-4 rounded-xl border-2 transition-colors", 
+              overdue ? "bg-rose-50 border-rose-100 hover:border-rose-200" : "bg-blue-50 border-blue-100 hover:border-blue-200"
+            )}>
+              <div className={cn("flex items-center gap-2 text-sm mb-2 font-semibold", 
+                overdue ? "text-rose-700" : "text-blue-700"
+              )}>
+                <div className={cn("p-1.5 rounded-lg", overdue ? "bg-rose-100" : "bg-blue-100")}>
+                  <Calendar className="h-4 w-4" />
+                </div>
+                Due Date
               </div>
-              <div className={overdue ? 'text-red-600 font-medium' : 'text-gray-900'}>
+              <div className={cn("font-bold text-lg", overdue ? "text-rose-700" : "text-blue-700")}>
                 {task.dueDate ? formatDate(task.dueDate) : 'No due date'}
               </div>
             </div>
             
             {/* Created At */}
-            <div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <Clock className="h-4 w-4" />
-                <span className="font-medium">Created</span>
+            <div className="p-4 bg-emerald-50 rounded-xl border-2 border-emerald-100 hover:border-emerald-200 transition-colors">
+              <div className="flex items-center gap-2 text-sm text-emerald-700 mb-2 font-semibold">
+                <div className="p-1.5 bg-emerald-100 rounded-lg">
+                  <Clock className="h-4 w-4" />
+                </div>
+                Created
               </div>
-              <div className="text-gray-900">{formatDateTime(task.createdAt)}</div>
+              <div className="text-emerald-700 font-bold text-lg">{formatDateTime(task.createdAt)}</div>
             </div>
             
             {/* Completed At */}
             {task.completedAt && (
-              <div>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="font-medium">Completed</span>
+              <div className="p-4 bg-green-50 rounded-xl border-2 border-green-100 hover:border-green-200 transition-colors">
+                <div className="flex items-center gap-2 text-sm text-green-700 mb-2 font-semibold">
+                  <div className="p-1.5 bg-green-100 rounded-lg">
+                    <CheckCircle className="h-4 w-4" />
+                  </div>
+                  Completed
                 </div>
-                <div className="text-gray-900">{formatDateTime(task.completedAt)}</div>
+                <div className="text-green-700 font-bold text-lg">{formatDateTime(task.completedAt)}</div>
               </div>
             )}
           </div>
