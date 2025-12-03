@@ -236,7 +236,7 @@ async getDashboardMetrics() {
       return {
         hours: 0,
         days: 0,
-        formatted: 'N/A'
+        formatted: '0'
       };
     }
 
