@@ -1,5 +1,5 @@
-const Task = require('../models/Task');
-const Employee = require('../models/Employee');
+const Task = require('../models/task');
+const Employee = require('../models/employee');
 const Logger = require('../config/logger');
 
 class DashboardService {
