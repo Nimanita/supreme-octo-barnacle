@@ -153,13 +153,6 @@ docker run -d -p 6379:6379 --name redis redis:latest
 
 ### Running the Application
 
-**Option 1: Run both apps from root** (recommended)
-```bash
-# From project root
-npm run dev
-```
-
-**Option 2: Run separately**
 ```bash
 # Terminal 1 - Backend
 cd backend
@@ -774,7 +767,7 @@ The console logs during tests show Redis behavior:
 
 ## 📖 Additional Documentation
 
-- [DECISIONS.md](./DECISIONS.md) - Architecture decisions and trade-offs
+- [DECISIONS.md](DECISION.md) - Architecture decisions and trade-offs
 
 ## 🚧 Future Improvements
 
