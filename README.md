@@ -97,7 +97,7 @@ npm install
 ```bash
 cd backend
 npm install
-cp .env.example .env
+
 ```
 
 Edit `backend/.env`:
@@ -113,7 +113,7 @@ NODE_ENV=development
 ```bash
 cd ../frontend
 npm install
-cp .env.example .env
+
 ```
 
 Edit `frontend/.env`:
@@ -795,10 +795,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```bash
 # Setup
 npm install                 # Install all dependencies
-npm run setup              # Setup both frontend and backend
 
 # Development
-npm run dev                # Run both apps concurrently
+
 npm run backend:dev        # Run backend only
 npm run frontend:dev       # Run frontend only
 
